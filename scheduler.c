@@ -81,6 +81,7 @@ int main()
       print_table(p_table);
 
       update_tick(p_table);
+      print_table(p_table);
 
       printf("\n\nThis is the table after updating any values");
       print_table(p_table);
