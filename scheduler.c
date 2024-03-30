@@ -35,7 +35,8 @@ typedef struct PROCESS PROCESS;
 #define LIST_TRAILER       MAX_PID + 1 /* Last item in linked list value   */
 #define LIST_HEADER        MIN_PID - 1 /* Start of linked list value      */
 #define INIT_PROCESS_VALUE 5   /* Number of initialized process    */
-#define MIN_
+#define TRUE               1
+#define FALSE              0
 
 /*******************************************************************/
 /*                       Function Prototypes                       */
@@ -54,6 +55,8 @@ void update_tick(PROCESS *p_table);
    /* Update table values for each clock tick                      */
 void sort_table(PROCESS *p_table, int number_of_processes);
    /* Sort table by PRI                                            */
+void schedule_table(PROCESS *p_table);
+   /* Schedules process' on the process table                      */
 
 /*******************************************************************/
 /*                          Main Function                          */
@@ -73,24 +76,20 @@ int main()
    for (process_pid = 1; process_pid <= INIT_PROCESS_VALUE; process_pid++)
       add_process(p_table, process_pid);
 
-   int number = 0;
-   // Testing update function
-   while( number != 5)
+   // Loop processing clock tick 
+   while( process_pid <= MAX_PID )
    {
-      printf("\n\nThis is the table before updating any values");
-      print_table(p_table);
-
+      
+      // Update each function each clock tick 
       update_tick(p_table);
-      print_table(p_table);
 
-      printf("\n\nThis is the table after updating any values");
-      print_table(p_table);
-
-      number_of_processes = count_process(p_table);
-      printf("\n\nThis is the table after sorting values");
+      // Call schedule function to check of there are any processes to terminate
+      schedule_table(p_table);
+      
+      // Sort table in order of priority 
       sort_table(p_table, number_of_processes);
 
-      number++;
+      process_pid++;
    }
 
    // print table
@@ -282,3 +281,54 @@ void sort_table(PROCESS *p_table, int number_of_processes)
          }
    return;
 }
+
+/************************************************************************/
+/*                        Schedule the process table                    */
+/************************************************************************/
+void schedule_table(PROCESS *p_table)
+{
+   PROCESS *p_current_process = p_table->p_next_process, /* Points to every process in the process table */
+           *p_previous_process = p_table; /* Points to the previous node*/
+
+   int running_process = FALSE;
+
+   // Terminate the running process if cpu_used = max_time
+   while (p_current_process->pid != LIST_TRAILER)
+   {
+      if (p_current_process->state == 'N' && p_current_process->cpu_used == p_current_process->max_time)
+      {
+         // Unhook process from linked list
+         p_previous_process->p_next_process = p_current_process->p_next_process;
+         p_current_process->p_next_process = NULL;
+
+         // Free memory for allocated for that node
+         free(p_current_process);
+
+         // No dangling pointers
+         p_current_process = p_previous_process->p_next_process;
+
+         /* Update running process variable */
+         running_process = FALSE;
+      }
+
+      // Set one process to run and leave other process alone
+      if (p_current_process->state == 'N')
+         running_process = TRUE;
+      else if (p_current_process->state == 'R' && running_process == FALSE)
+      {
+         p_current_process->state = 'N';
+         running_process = TRUE;
+      }
+
+      // Block running process
+      if (p_current_process->state = 'N'  && p_current_process->cpu_used == p_current_process->block_time
+          && p_current_process->block_time < 6 )
+         p_current_process->state = 'B'; 
+
+   // Move down the list to the next process
+   p_current_process = p_current_process->p_next_process;
+   p_previous_process = p_previous_process->p_next_process;
+   }
+   return;
+}
+
