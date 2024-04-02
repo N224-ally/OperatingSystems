@@ -289,6 +289,7 @@ void sort_table(PROCESS *p_table, int number_of_processes)
       }
    }
 
+   // Sort the top half of the list (the negative numbers) in descending order
    for (p_counter = p_table->p_next_process; p_counter->pri < 0; p_counter = p_counter->p_next_process) 
    {
       p_previous = p_table;
@@ -325,14 +326,15 @@ int schedule_table(PROCESS *p_table)
 {
    PROCESS *p_current_process = p_table->p_next_process; /* Points to every process in the process table */
 
-   int running_process = FALSE;
-   int print_schedule  = FALSE;
+   int running_process = 0;
+   int print_schedule  = 0;
 
    /* Check of any running process is on the table  */
    while(p_current_process->pid != LIST_TRAILER)
    {
       if (p_current_process->state == 'N')
-         running_process = TRUE;
+         running_process = 1;
+
       p_current_process = p_current_process->p_next_process;
    }  
 
@@ -342,51 +344,88 @@ int schedule_table(PROCESS *p_table)
    /* Loop processing context switches */
    while (p_current_process->pid != LIST_TRAILER)
    {
-      /* Running to blocked context switch */
-      if (p_current_process->cpu_used = p_current_process->block_time)
+      /* Block a running process */
+      if (p_current_process->cpu_used == p_current_process->block_time && p_current_process->state == 'N')
       {
          printf("\n\nHere is the process table before scheduling");
          print_table(p_table);
-         print_schedule = TRUE;
+         print_schedule = 1;
+         running_process = 0;
 
          if(p_current_process->block_time == 6)
          {
-            p_current_process->pri = ((-1)*((abs(p_current_process->pri) + p_current_process->quantum_used) * 2));
+            p_current_process->pri = (int)((abs(p_current_process->pri) + p_current_process->quantum_used) / 2);
             p_current_process->state = 'R';
          }
          else
          {
-            p_current_process->pri = ((abs(p_current_process->pri) + p_current_process->quantum_used) * 2);
+            p_current_process->pri = (int)((-1)*((abs(p_current_process->pri) + p_current_process->quantum_used) / 2));
             p_current_process->state = 'B';
          }
          p_current_process->quantum_used = 0;
+         
+         /* Set next Ready process to running */
+         p_current_process = p_table->p_next_process;
+         while(p_current_process->pid != LIST_TRAILER && running_process == FALSE)
+         {
+            if (p_current_process->state == 'R')
+            {
+
+            printf("\n\nHere is the process table before scheduling");
+            print_table(p_table);
+
+            running_process = 1;
+            p_current_process->state = 'N';
+            print_schedule = 1;
+            }
+         }
+         
       }
 
-      /* Running to delete context switch */
-      else if (p_current_process->cpu_used == p_current_process->max_time)
+      /* Delete a running process and set next process to run */
+      if (p_current_process->cpu_used == p_current_process->max_time && p_current_process->state == 'N')
       {
-         printf("\n\nHere is the process table before scheduling");
-         print_table(p_table);
-         print_schedule = TRUE;
-         running_process = FALSE;
-
+         /* Delete process */
+         print_schedule = 1;
+         running_process = 0;
          remove_process(p_table, p_current_process->pid);
+         
+         /* Set next Ready process to running */
+         p_current_process = p_table->p_next_process;
+         while(p_current_process->pid != LIST_TRAILER && running_process == FALSE)
+         {
+            if (p_current_process->state == 'R')
+            {
+
+            printf("\n\nHere is the process table before scheduling");
+            print_table(p_table);
+
+            running_process = 1;
+            p_current_process->state = 'N';
+            print_schedule = 1;
+            }
+         }
       }
 
    // Move down the list to the next process
-   p_current_process  = p_current_process->p_next_process;
+   p_current_process = p_current_process->p_next_process;
    }
 
    /* Ready to Running context switch */
-   if (running_process == FALSE)
+   if (running_process == 0)
    {
       p_current_process = p_table->p_next_process;
-      while(p_current_process->pid != LIST_TRAILER && running_process == TRUE)
+      while(p_current_process->pid != LIST_TRAILER && running_process == FALSE)
       {
          if (p_current_process->state == 'R')
          {
-            running_process = TRUE;
+
+            printf("\n\nHere is the process table before scheduling");
+            print_table(p_table);
+
+            running_process = 1;
             p_current_process->state = 'N';
+            print_schedule = 1;
          }
          p_current_process = p_current_process->p_next_process;
       }
@@ -401,29 +440,27 @@ int schedule_table(PROCESS *p_table)
 void remove_process(PROCESS *p_table, int delete_pid)
 {
    PROCESS *p_current_process = p_table->p_next_process, // Points to the current process
-           *p_previous_process = p_table;                // Points to the previous process
-
+           *p_previous_process = p_table,                // Points to the previous process
+           *p_temp;                                      // To switch processes
 
    while (p_current_process->pid != LIST_TRAILER)
    {
-      // Process is removed from table and next runnable process is set running)
-      if (p_current_process->pid = delete_pid)
+      // Check if the current process should be deleted
+      if (p_current_process->pid == delete_pid)
       {
          // Unhook process from linked list
          p_previous_process->p_next_process = p_current_process->p_next_process;
-         p_current_process->p_next_process = NULL;
+         p_temp = p_current_process;
+         p_current_process = p_current_process->p_next_process;
 
          // Free memory for allocated for that node
-         free(p_current_process);
-
-         // Reset pointer at the top of the process
-         p_current_process = p_previous_process->p_next_process;      
+         free(p_temp);
       }
-
-   p_current_process = p_current_process->p_next_process;
-   p_previous_process = p_previous_process->p_next_process;
+      else
+      {
+         // Move to the next process
+         p_previous_process = p_current_process;
+         p_current_process = p_current_process->p_next_process;
+      }
    }
-
-   return;
-}   
-
+}
