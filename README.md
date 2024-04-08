@@ -26,6 +26,6 @@ what linked lists excel at.
 MOST IMPORTANT THING WHEN WRITING THIS IS HOW YOU STRUCTURE YOUR MAIN.
 - I used alot of if-else statements but I think a switch statement may work better.
 - Test each function. Test edge cases. Test thoroughly
-- **Scheduler is essentiall 4 movements between 3 states**
+- **Scheduler is essentially 4 movements between 3 states**
   - Ready to Blocked, Blocked to Ready, Running to Ready, Running to Blocked, and Delete
   - the whole program should be structured around performing those actions
