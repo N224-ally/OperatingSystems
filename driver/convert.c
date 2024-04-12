@@ -1,6 +1,6 @@
 /**********************************************************************/
 /*                                                                    */
-/* Program Name: Convert - Takes a disk number and prints its         */
+/* Program Name: Convert - Recieve and convert a block number to its  */
 /*                         corresponding disk location                */
 /* Author:       Niwe Mugeni                                          */
 /* Installation: Pensacola Christian COlelge, Pensacola Flordia       */
@@ -30,12 +30,16 @@
 
 
 /**********************************************************************/
-/*                         Function Declerations                      */
+/*                       Function Prototypes                          */
 /**********************************************************************/
 void convert_block(int block_number, int *p_cylinder, int *p_track,
                                                       int *p_sector);
-   /* Converts block number to corresponding cylinder track and sector */
+   /* Converts block number to corresponding cylinder, track, and     */
+   /* sector                                                          */
 
+/**********************************************************************/
+/*                        Main Function                               */
+/**********************************************************************/
 int main()
 {
    int block_num,    /* Current block number                          */
@@ -49,19 +53,18 @@ int main()
                    SECTOR_BYTES) / BLOCK_BYTES);
 
    /* Print heading                                                   */
-   printf("\n Block       Cylinder        Track      Sector");
-   printf("\n--------    -----------     -------     -------");
+   printf("\n Block       Cylinder       Track      Sector");
+   printf("\n--------    -----------    -------     -------");
    
    /* Loop processing and displaying all blocks                       */
    for (block_num = 1; block_num <= block_total; block_num++)
    {
       convert_block(block_num, &cylinder_num, &track_num, &sector_num);
 
-      printf("\n  %3d",         block_num); 
-      printf("            %2d", cylinder_num);
+      printf("\n %3d",          block_num); 
+      printf("            %2d", cylinder_num);                          
       printf("            %d",  track_num);
       printf("           %d",   sector_num);
-
    }
 
    return 0;
@@ -73,16 +76,16 @@ int main()
 void convert_block(int block_number, int *p_cylinder, int *p_track, 
                                                       int *p_sector)
 {
-   /* Convert block number to cylinder number */
-   *p_cylinder = ((block_number-1) / 9);
+   /* Convert block number to cylinder number                         */
+   *p_cylinder = ((block_number - 1) / SECTOR_NUM);
 
-   /* Convert block number to track number */
+   /* Convert block number to track number                            */
    if(((block_number - 1) % SECTOR_NUM) < (SECTOR_NUM / 2))
       *p_track = 0;
    else
       *p_track = 1;
 
-   /* Conver block number to sector number */
+   /* Convert block number to sector number                           */
    *p_sector = ((block_number - 1) % SECTOR_NUM) * TRACK_NUM;
 
    if(SECTOR_NUM <= *p_sector)
