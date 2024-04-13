@@ -80,7 +80,7 @@ void convert_block(int block_number, int *p_cylinder, int *p_track,
    *p_cylinder = ((block_number - 1) / SECTOR_NUM);
 
    /* Convert block number to track number                            */
-   if(((block_number - 1) % SECTOR_NUM) < (SECTOR_NUM / 2))
+   if(((block_number - 1) % SECTOR_NUM) < ((float)SECTOR_NUM * 0.5f))
       *p_track = 0;
    else
       *p_track = 1;
