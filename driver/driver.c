@@ -338,17 +338,17 @@ int validate(int index)
 
    if(request_list[index].operation_code != 1 &&
       request_list[index].operation_code != 2)
-      error_code += OP_CODE_ERROR;
+      error_code = OP_CODE_ERROR;
    else if(request_list[index].request_number <= 0)
-      error_code += REQUEST_NUM_ERROR;
+      error_code = REQUEST_NUM_ERROR;
    else if(request_list[index].block_number <= 0 ||
       request_list[index].block_number > BYTES_PER_BLOCK)
-      error_code += BLOCK_NUM_ERROR;
+      error_code = BLOCK_NUM_ERROR;
    else if(request_list[index].block_size < 0 ||
      (request_list[index].block_size &(request_list[index].block_size - 1)))
-      error_code += BLOCK_SIZE_ERROR;
+      error_code = BLOCK_SIZE_ERROR;
    else if(request_list[index].p_data_address < 0)
-      error_code += DATA_ADDRESS_ERROR;
+      error_code = DATA_ADDRESS_ERROR;
 
   return error_code;
 }
