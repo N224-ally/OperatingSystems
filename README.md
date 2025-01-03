@@ -7,18 +7,17 @@ The Scheduler simulates how resources are managed and distributed by the schedul
 to the CPU. 
 
 A Process Structure consists of 8 attributes:
-- PID 
-- CPU USED
-- MAX TIME
-- STATE
-- PRI
-- QUANTUM USED
-- BLK TIME
-- WAIT TKS
+- PID = the process id number
+- CPU USED = the amount of cpu cycles used
+- MAX TIME = the maximum amount of time the process may use
+- STATE = whether the state was running, blocked, or deleted
+- PRI = the priority level of the process
+- QUANTUM USED = the amount of cpu cycles it had already ran
+- BLK TIME = the amount cpy cycles the process had been blocked for
+- WAIT TKS = how long the process had to wait 
 
-There are several rules that we were given to help construct a scheduler that prints out 
-the process table ONLY when deleting a process, or scheduling another process. I may or may not write 
-out the requirements (this is due in 10 days) if I have time.
+There are several rules that we were given to help construct a scheduler. Among them were that the scheduler
+only prints when deleting a process, or scheduling another process.
 
 I chose to use a linked list as opposed to an array because insertion and deletion is 
 what linked lists excel at.
